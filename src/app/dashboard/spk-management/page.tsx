@@ -28,7 +28,7 @@ import { useSpkData } from '@/hooks/useSpkData';
 import { toast } from 'sonner';
 import { MoreHorizontal, FileText, Download, Eye, Edit, CheckCircle, Clock, Edit3, FileDown, IdCard, Users, RefreshCw } from 'lucide-react';
 import { pdf } from '@react-pdf/renderer';
-import SpkDocument from '@/components/SpkDocument';
+import SpkPdfDocument from '@/components/SpkPdfDocument';
 import {
   DataGrid,
   GridColDef,
@@ -195,76 +195,17 @@ export default function SpkManagementPage() {
     }));
   }, []);
 
-  // Handle PDF generation
+  // Handle PDF generation - pass raw SPK data to SpkPdfDocument
   const generatePdfData = useCallback((spk: SPK) => {
-    const formatDate = (dateString: string) => {
-      if (!dateString) return '-';
-      const date = new Date(dateString);
-      const options: Intl.DateTimeFormatOptions = {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      };
-      return `Jakarta, ${date.toLocaleDateString('id-ID', options)}`;
-    };
-
-    const formatCurrency = (amount: number | undefined) => {
-      if (!amount) return 'Rp 0';
-      return `Rp ${amount.toLocaleString('id-ID')}`;
-    };
-
-    return {
-      spkNumber: spk.noSPK,
-      date: formatDate(spk.tanggal),
-      customer: {
-        namaLengkap: spk.namaCustomer || '-',
-        alamat: spk.alamatCustomer || '-',
-        kecamatan: '-',
-        kotaKabupaten: spk.kotacustomer || '-',
-        kodePos: '-',
-        noTelepon: spk.noTeleponCustomer || '-',
-        noTeleponAlt: '-',
-        email: spk.emailcustomer || '-',
-        noKtp: '-',
-        npwp: '-',
-        pembayaran: spk.unitInfo ? 'KREDIT' : 'TUNAI',
-        jenisPerusahaan: 'Perorangan',
-        namaPerusahaan: '-',
-        alamatPerusahaan: '-',
-        npwpPerusahaan: '-',
-      },
-      vehicle: {
-        tipeKendaraan: (spk.unitInfo && spk.unitInfo.vehicleType && spk.unitInfo.vehicleType.name) ? spk.unitInfo.vehicleType.name : '-',
-        tahunPembuatan: (spk.unitInfo && spk.unitInfo.tahun) ? spk.unitInfo.tahun : new Date().getFullYear().toString(),
-        warnaKendaraan: (spk.unitInfo && spk.unitInfo.color && spk.unitInfo.color.colorname) ? spk.unitInfo.color.colorname : '-',
-        warnaInterior: 'ABU-ABU',
-        noMesin: (spk.unitInfo && spk.unitInfo.noMesin) ? spk.unitInfo.noMesin : 'Dilihat pada unit',
-        noRangka: (spk.unitInfo && spk.unitInfo.noRangka) ? spk.unitInfo.noRangka : 'Dilihat pada unit',
-        hargaSatuan: (spk.unitInfo && spk.unitInfo.hargaOtr) ? spk.unitInfo.hargaOtr.toString() : '0',
-        aksesoris: [],
-        totalHarga: (spk.unitInfo && spk.unitInfo.hargaOtr) ? spk.unitInfo.hargaOtr.toString() : '0',
-        uangMuka: (spk.unitInfo && spk.unitInfo.hargaOtr) ? Math.floor(spk.unitInfo.hargaOtr * 0.3).toString() : '0',
-        sisaPembayaran: (spk.unitInfo && spk.unitInfo.hargaOtr) ? Math.floor(spk.unitInfo.hargaOtr * 0.7).toString() : '0',
-        alamatKirim: spk.alamatCustomer || '-',
-        jangkaWaktuPengiriman: '12 minggu',
-        namaPenerima: spk.namaCustomer || '-',
-      },
-      sales: {
-        nama: spk.salesProfile?.surename || '-',
-      },
-      signatures: {
-        customer: spk.namaCustomer || '-',
-        cabang: spk.salesProfile?.city || '-',
-      },
-    };
+    // SpkPdfDocument expects the raw SPK data structure directly
+    return spk;
   }, []);
 
   // Handle PDF preview
   const handlePreviewPdf = useCallback(async (spk: SPK) => {
     try {
       const pdfData = generatePdfData(spk);
-      const doc = <SpkDocument data={pdfData} />;
+      const doc = <SpkPdfDocument data={pdfData} />;
       const pdfBlob = await pdf(doc).toBlob();
 
       const url = URL.createObjectURL(pdfBlob);
@@ -283,7 +224,7 @@ export default function SpkManagementPage() {
   const handleDownloadPdf = useCallback(async (spk: SPK) => {
     try {
       const pdfData = generatePdfData(spk);
-      const doc = <SpkDocument data={pdfData} />;
+      const doc = <SpkPdfDocument data={pdfData} />;
       const pdfBlob = await pdf(doc).toBlob();
 
       const url = URL.createObjectURL(pdfBlob);

@@ -23,6 +23,15 @@ const nextConfig = {
       'google.maps': 'google.maps'
     })
 
+    // Ensure image files are properly handled for @react-pdf/renderer
+    config.module.rules.push({
+      test: /\.(jpg|jpeg|png|gif|svg)$/,
+      type: 'asset/resource',
+      generator: {
+        filename: 'static/images/[name].[hash][ext]',
+      },
+    })
+
     return config
   }
 }
