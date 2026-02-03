@@ -49,10 +49,13 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Copy static assets from builder stage
 COPY --from=builder /app/out /usr/share/nginx/html
 
-# Verify static files were copied
-RUN ls -la /usr/share/nginx/html/_next/static/chunks/ | head -5 && \
-    ls -la /usr/share/nginx/html/_next/static/css/ | head -5 && \
-    ls -la /usr/share/nginx/html/logo-wide.jpg || echo "Warning: logo file not found"
+# Verify static files were copied and set permissions
+RUN ls -la /usr/share/nginx/html/_next/static/chunks/ && \
+    ls -la /usr/share/nginx/html/_next/static/css/ && \
+    test -f /usr/share/nginx/html/logo-wide.jpg || echo "Warning: logo file not found" && \
+    # Ensure all static files are readable
+    chmod -R 755 /usr/share/nginx/html/_next && \
+    chmod 644 /usr/share/nginx/html/_next/static/css/*.* 2>/dev/null || true
 
 # Set proper ownership
 RUN chown -R nginx-app:nginx-app /usr/share/nginx/html && \
