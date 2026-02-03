@@ -27,6 +27,9 @@ ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
 # Build the application
 # Note: next.config.js must have output: 'export'
 RUN npm run build && \
+    # Verify build output exists
+    ls -la out/_next/static/chunks/ | head -5 && \
+    ls -la out/_next/static/css/ | head -5 && \
     # Remove source files after build to reduce image size
     rm -rf src node_modules
 
@@ -45,6 +48,11 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy static assets from builder stage
 COPY --from=builder /app/out /usr/share/nginx/html
+
+# Verify static files were copied
+RUN ls -la /usr/share/nginx/html/_next/static/chunks/ | head -5 && \
+    ls -la /usr/share/nginx/html/_next/static/css/ | head -5 && \
+    ls -la /usr/share/nginx/html/logo-wide.jpg || echo "Warning: logo file not found"
 
 # Set proper ownership
 RUN chown -R nginx-app:nginx-app /usr/share/nginx/html && \
