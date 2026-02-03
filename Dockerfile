@@ -68,12 +68,12 @@ RUN chown -R nginx-app:nginx-app /usr/share/nginx/html && \
 # Switch to non-root user
 USER nginx-app
 
-# Expose port 80 (standard HTTP, nginx listens on 3000 internally)
-EXPOSE 3000
+# Expose port 80 for Coolify reverse proxy
+EXPOSE 80
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost:3000/ || exit 1
+    CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
 
 # Start nginx with dumb-init
 ENTRYPOINT ["dumb-init", "--"]
