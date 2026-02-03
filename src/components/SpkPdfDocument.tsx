@@ -1,6 +1,5 @@
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
-import logo from '@/assets/logoBase64';
 
 // Create styles
 const styles = StyleSheet.create({
@@ -119,7 +118,7 @@ const SpkPdfDocument: React.FC<SpkPdfProps> = ({ data }) => {
             <Page size="A4" style={styles.page}>
                 {/* Header */}
                 <View style={styles.header}>
-                    <Image style={styles.logo} src={logo} />
+                    <Image style={styles.logo} src="/logo-wide.jpg" />
                     <View style={styles.titleContainer}>
                         <Text style={styles.reportTitle}>SURAT PEMESANAN KENDARAAN</Text>
                         <Text style={styles.spkNumber}>No: {data.noSPK || '-'}</Text>
